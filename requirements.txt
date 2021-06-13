@@ -1,0 +1,7 @@
+matplotlib # visualizações
+plotly # visualizações
+dash # trás as visualizações para a web
+pandas # dados estruturados
+black # formatador de código
+openpyxl # leitura de arquivos .xlsx
+
