@@ -25,10 +25,147 @@ anos de importação e exportação), criando assim uma coluna para
 identificar se aquilo é um registro de importação ou exportação. O
 nome desta coluna deve ser MOVIMENTACAO.
 """
-# chega no site
+import csv
+from collections import namedtuple
+from glob import glob
+import urllib.request
+import shutil
+import ssl
 
-# pega os dados dos últimos tres anos para importação
+import pandas as pd
+import bs4
 
-# pega os dados dos últimos tres anos para exportação
+# caminhos e URLs
+EXPORT_DATA_URL_PATH = "balanca/bd/comexstat-bd/ncm/EXP"
+IMPORT_DATA_URL_PATH = "balanca/bd/comexstat-bd/ncmv2/IMP"
+RESOURCE_URL = "https://www.gov.br/produtividade-e-comercio-exterior/pt-br/assuntos/comercio-exterior/estatisticas/base-de-dados-bruta"
+DOWNLOAD_PATH = "new_data/"
+# colunas do arquivo de importação para dropar
+IMPORT_COLUMNS_DROP = ["VL_FRETE", "VL_SEGURO"]
+TARGET_FILENAME = "f_comex.csv"  # nome do arquivo final
+# nomes final para as colunas de ambos os tipos de dados
+TARGET_DATA_HEADER = [
+    "ANO",
+    "MES",
+    "COD_NCM",
+    "COD_UNIDADE",
+    "COD_PAIS",
+    "SG_UF",
+    "COD_VIA",
+    "COD_URF",
+    " VL_QUANTIDADE",
+    "VL_PESO_KG",
+    "VL_FOB",
+]
+DELIMITER = ";"
+ENCODING = "utf-8"
+# zeros a adicionar no final destas colunas
+SIZE_COD_NCM = 8
+SIZE_COD_PAIS = 3
+SIZE_COD_URF = 7
+SIZE_COD_SH4 = 4
 
-#salva no diretorio de data/
+DownloadLinks = namedtuple("DownloadLinks", ["type", "year", "url"])
+
+# link de download dos arquivos está certificado por uma autoridade que não pode ser verificada formalmente,
+# é necessário então forçar um contexto de sessão não verificado
+# fonte: https://stackoverflow.com/a/60671292/9881255
+ssl._create_default_https_context = ssl._create_unverified_context
+
+try:
+    url = urllib.request.urlopen(RESOURCE_URL)
+    html_content = url.read().decode("utf-8")
+    url.close()
+# poderia tratar exceções específicas aqui depois
+except:
+    print("Houve um erro na conexão, devemos tentar novamente")
+    exit()
+
+soup = bs4.BeautifulSoup(html_content, features="html.parser")
+
+
+# encontra a porção com o dado que queremos
+tables = soup.find_all("table", class_="plain")
+export_data_table, import_data_table = tables[:2]
+
+# lista os links para download
+import_download_anchors = import_data_table.find_all("a")
+export_download_anchors = export_data_table.find_all("a")
+
+# valida que são as tabelas que precisamos
+try:
+    assert EXPORT_DATA_URL_PATH in export_download_anchors[0].get("href")
+    assert IMPORT_DATA_URL_PATH in import_download_anchors[0].get("href")
+except AssertionError:
+    print("Os links parecem ter mudado, que tal verificar a página?")
+    exit()
+
+export_download_links = []
+for anchor in export_download_anchors:
+
+    # skip em linhas que não contém arquivos por ano
+    try:
+        int(anchor.text)
+    except ValueError:
+        continue
+
+    export_download_links.append(
+        DownloadLinks(
+            type="export", year=int(anchor.text), url=anchor.get("href", None)
+        )
+    )
+
+
+import_download_links = []
+for anchor in import_download_anchors:
+
+    # skip em linhas que não contém arquivos por ano
+    try:
+        int(anchor.text)
+    except ValueError:
+        continue
+
+    import_download_links.append(
+        DownloadLinks(
+            type="import", year=int(anchor.text), url=anchor.get("href", None)
+        )
+    )
+
+
+# ordena por ano em ordem decrescente
+export_download_links.sort(key=lambda link: link.year, reverse=True)
+import_download_links.sort(key=lambda link: link.year, reverse=True)
+
+downloaded_dfs = []
+# Faz o donwload dos dados de exportação
+for link in export_download_links[:2]:  # + import_download_links[:3]:
+    # se o arquivo já existe, só recria ele se foi pedido
+
+    # pasta mais nome de arquivo destino
+    filename = DOWNLOAD_PATH + link.url.rsplit("/", 1)[-1]
+
+    with urllib.request.urlopen(link.url) as response, open(filename, "wb") as out_file:
+        shutil.copyfileobj(response, out_file)
+
+    df = pd.read_csv(
+        filename,
+        delimiter=DELIMITER,
+        dtype=str,
+    )
+
+    if link.type == "import":
+        df.drop(
+            IMPORT_COLUMNS_DROP,
+            axis=1,
+            inplace=True,
+        )
+
+    df.columns = TARGET_DATA_HEADER
+    df["MOVIMENTACAO"] = "importação" if link.type == "import" else "exportação"
+
+    downloaded_dfs.append(df)
+
+
+# Une os arquivos
+final_df = pd.concat(downloaded_dfs)
+final_df.to_csv(DOWNLOAD_PATH + TARGET_FILENAME, sep=DELIMITER, encoding=ENCODING, index=False)
