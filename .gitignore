@@ -55,6 +55,9 @@ coverage.xml
 *.mo
 *.pot
 
+# Data folder is just ot large for Github
+data/
+
 # Django stuff:
 *.log
 local_settings.py
