@@ -6,3 +6,11 @@ Instale os pacotes requeridos e execute o app com `python3 app.py` então acesse
 
 ### Deploy no Heroku
 Para acessar este app no Heroku, acesse <add aqui depois>
+
+### TODO:
+
+ - Formata os dados da tabela pra ficarem com pontos nos milhares
+ - Formata os dados da tabela para terem '%' nos valores percentuais
+ - Encontra nomes fictícios mais bonitinhos para as colunas da tabela
+ - FAZ OS ESTILOS DA PÀGINA VEIO
+ - Começa a escrever o script de extração de dados
