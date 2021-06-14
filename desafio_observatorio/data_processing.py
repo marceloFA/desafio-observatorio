@@ -1,34 +1,16 @@
 """ Módulo de processamento de dados """
+import os
+
 import pandas as pd
 
-from helpers import STATES, INDICATOR_OPTIONS,IMPORT_DATA_COLUMNS, EXPORT_DATA_COLUMNS
+from helpers import STATES, INDICATOR_OPTIONS, DATASET_FILNAME, S3_BUCKET_URL, LOCAL_FILES_DIR
 
 
-# todo: quando importar os dados dos três anos, refatorar isso em constantes, se necessário
-import_2020_file_path = "data/IMP_2020_V2.csv"
-export_2020_file_path = "data/EXP_2020.csv"
-DELIMITER = ";"
+def get_dataset_path():
+    """ Determina se os dados estão locais ou no s3 bucket """
 
-def process_dataset() -> pd.DataFrame:
-    """ Processamento inicial do conjunto de dados 
-    
-    Retorna:
-        pd.DataFrame: Tabela com os dados de importação e exportação dos últimos 3 anos
-    """
-    # dados de importação
-    import_data = pd.read_csv(import_2020_file_path, delimiter=DELIMITER)
-    import_data.columns = IMPORT_DATA_COLUMNS
-    import_data["MOVIMENTACAO"] = "importação"
-
-    # dados de exportação
-    export_data = pd.read_csv(export_2020_file_path, delimiter=DELIMITER)
-    export_data.columns = EXPORT_DATA_COLUMNS
-    export_data["MOVIMENTACAO"] = "exportação"
-
-    # junta os dados em um único dataset
-    dataset = pd.concat([export_data, import_data])
-
-    return dataset
+    where_ = LOCAL_FILES_DIR if os.path.isfile(LOCAL_FILES_DIR+DATASET_FILNAME) else S3_BUCKET_URL
+    return where_ + DATASET_FILNAME
 
 
 def calculate_percentual_contribution(dataset: pd.DataFrame) -> pd.DataFrame:

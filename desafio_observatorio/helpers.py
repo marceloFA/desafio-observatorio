@@ -1,6 +1,17 @@
 """ Módulo para dados, constantes e métodos auxiliares """
 
-IMPORT_DATA_COLUMNS = [
+# onde encontrar os arquivos
+S3_BUCKET_URL = "https://observatorio-da-industria.s3.amazonaws.com/"
+LOCAL_FILES_DIR =  "data/"
+
+# nomes dos arquivos
+DATASET_FILNAME = "f_comex.csv"
+NCM_FILENAME = "d_sh2.xlsx"
+VIA_FILENAME = "d_via.xlsx"
+
+DELIMITER = ";"
+
+COLUMNS_NAMES = [
     "ANO",
     "MES",
     "COD_NCM",
@@ -11,32 +22,13 @@ IMPORT_DATA_COLUMNS = [
     "COD_URF",
     "VL_QUANTIDADE",
     "VL_PESO_KG",
-    "VL_FOB",
-    "VL_FRETE",
-    "VL_SEGURO",
-]
-
-EXPORT_DATA_COLUMNS = [
-    "ANO",
-    "MES",
-    "COD_NCM",
-    "COD_UNIDADE",
-    "COD_PAIS",
-    "SG_UF",
-    "COD_VIA",
-    "COD_URF",
-    "QT_ESTAT",
-    "KG_LIQUIDO",
     "VL_FOB",
 ]
 
 INDICATOR_OPTIONS = [
-    "QT_ESTAT",
+    "VL_QUANTIDADE",
     "VL_PESO_KG",
     "VL_FOB",
-    "VL_QUANTIDADE",
-    "VL_FRETE",
-    "VL_SEGURO",
 ]
 
 VIA = {

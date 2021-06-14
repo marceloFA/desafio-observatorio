@@ -35,11 +35,12 @@ import ssl
 import pandas as pd
 import bs4
 
+N_FILES = 3
 # caminhos e URLs
 EXPORT_DATA_URL_PATH = "balanca/bd/comexstat-bd/ncm/EXP"
 IMPORT_DATA_URL_PATH = "balanca/bd/comexstat-bd/ncmv2/IMP"
 RESOURCE_URL = "https://www.gov.br/produtividade-e-comercio-exterior/pt-br/assuntos/comercio-exterior/estatisticas/base-de-dados-bruta"
-DOWNLOAD_PATH = "new_data/"
+DOWNLOAD_PATH = "data/"
 # colunas do arquivo de importação para dropar
 IMPORT_COLUMNS_DROP = ["VL_FRETE", "VL_SEGURO"]
 TARGET_FILENAME = "f_comex.csv"  # nome do arquivo final
@@ -136,10 +137,11 @@ for anchor in import_download_anchors:
 export_download_links.sort(key=lambda link: link.year, reverse=True)
 import_download_links.sort(key=lambda link: link.year, reverse=True)
 
+# todo: cria o diretório data se não exisitir
+
 downloaded_dfs = []
 # Faz o donwload dos dados de exportação
-for link in export_download_links[:2]:  # + import_download_links[:3]:
-    # se o arquivo já existe, só recria ele se foi pedido
+for i, link in enumerate(export_download_links[:N_FILES] + import_download_links[:N_FILES], start=1):
 
     # pasta mais nome de arquivo destino
     filename = DOWNLOAD_PATH + link.url.rsplit("/", 1)[-1]
@@ -164,6 +166,8 @@ for link in export_download_links[:2]:  # + import_download_links[:3]:
     df["MOVIMENTACAO"] = "importação" if link.type == "import" else "exportação"
 
     downloaded_dfs.append(df)
+
+    print(f'Arquivo finalizado {i}/{N_FILES*2}')
 
 
 # Une os arquivos

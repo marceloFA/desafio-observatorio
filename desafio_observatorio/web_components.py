@@ -7,11 +7,11 @@ import plotly.express as px
 import pandas as pd
 
 import data_processing
-from helpers import(
-    VIA, MONTHS, INDICATOR_OPTIONS,
-)
+from helpers import VIA, MONTHS, INDICATOR_OPTIONS, COLUMNS_NAMES, DELIMITER
 
-dataset = data_processing.process_dataset()
+file_path = data_processing.get_dataset_path()
+dataset = pd.read_csv(file_path, delimiter=DELIMITER)
+
 # colunas que serão somadas par aobter o acumulado por mês
 operation_options = dataset["MOVIMENTACAO"].unique()
 # também é usado como lista de opções para o dropdown
