@@ -1,43 +1,44 @@
 """ Módulo de processamento de dados """
 import os
+import requests
 
 import pandas as pd
 
-from helpers import STATES, INDICATOR_OPTIONS, DATASET_FILNAME, S3_BUCKET_URL, LOCAL_FILES_DIR
+from helpers import STATES, INDICATOR_OPTIONS, API_URL, LOCAL_FILES_DIR
 
 
-def get_dataset_path():
-    """ Determina se os dados estão locais ou no s3 bucket """
+def hit_api(endpoint: str) -> dict:
+    """Wrapper de uma requisição para pedir dados a API"""
+    headers = {
+        "accept": "application/json",
+    }
 
-    where_ = LOCAL_FILES_DIR if os.path.isfile(LOCAL_FILES_DIR+DATASET_FILNAME) else S3_BUCKET_URL
-    return where_ + DATASET_FILNAME
+    response = requests.get(API_URL + endpoint, headers=headers)
+
+    return response.json()
 
 
-def calculate_percentual_contribution(dataset: pd.DataFrame) -> pd.DataFrame:
-    """Caclula a contribuição percentual de cada estado
-        para cada indicador
+def api_get_ncm_code_listing() -> dict:
+    """Requisita da API a listagem de códigos NCM"""
 
-    Retorna:
-        pd.DataFrame: Tabela com as contribuições percentuais por estado
-    """
+    return hit_api("cod_ncm_listing/")
 
-    # agrupa por estado e soma os totais
-    total_by_state = dataset.groupby(["SG_UF"])[INDICATOR_OPTIONS].sum()
-    total_by_state.reset_index(level=0, inplace=True)  # remove SG_UF como index externo
 
-    # calcula os percentuais por estado
-    for indicator in INDICATOR_OPTIONS:
-        # nome da nova coluna com a contribuição percenutal
-        new_col_name = f"{indicator}_CONTRIB_%"
+def api_get_state_contribution() -> dict:
+    """Requisita da API dados sobre a contribuição percentual por estado"""
 
-        total = total_by_state[indicator].sum()
-        total_by_state[new_col_name] = total_by_state[indicator].apply(
-            lambda x: round(x / total * 100, 2)
-        )
+    return hit_api("states_contribution/")
 
-    # Substitui a sigla pelo nome do estado
-    total_by_state["SG_UF"] = total_by_state["SG_UF"].apply(
-        lambda x: STATES.get(x, "Exportação")
-    )
 
-    return total_by_state
+def api_get_operation_statistics(year: int, operation: str, cod_ncm: int) -> dict:
+    """Obtém estatísticas sobre operações financeiras"""
+
+    operation_key = OPERATION_OPTIONS[operation]
+    return hit_api(f"operation_statistics/{year}/{operation_key}/{cod_ncm}")
+
+
+def api_get_via_statistics_statistics(year: int, operation: str, cod_ncm: int) -> dict:
+    """Obtém dados sobre uso da via"""
+
+    operation_key = OPERATION_OPTIONS[operation]
+    return hit_api(f"via_statistics/{year}/{operation_key}/{cod_ncm}")

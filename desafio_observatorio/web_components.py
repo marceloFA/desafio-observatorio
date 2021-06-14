@@ -7,17 +7,18 @@ import plotly.express as px
 import pandas as pd
 
 import data_processing
-from helpers import VIA, MONTHS, INDICATOR_OPTIONS, COLUMNS_NAMES, DELIMITER
+from helpers import (
+    VIA,
+    MONTHS,
+    INDICATOR_OPTIONS,
+    OPERATION_OPTIONS,
+)
 
-file_path = data_processing.get_dataset_path()
-dataset = pd.read_csv(file_path, delimiter=DELIMITER)
 
-# colunas que serão somadas par aobter o acumulado por mês
-operation_options = dataset["MOVIMENTACAO"].unique()
 # também é usado como lista de opções para o dropdown
-product_options = dataset["COD_NCM"].unique()
+product_options = data_processing.api_get_ncm_code_listing()
 # Preparando os dados da tabela
-total_by_state = data_processing.calculate_percentual_contribution(dataset)
+total_by_state = data_processing.api_get_state_contribution()
 
 # instanciando um app Dash
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
@@ -34,8 +35,10 @@ app.layout = html.Div(
                 # Escolha da movimentação
                 dcc.Dropdown(
                     id="operation-options-dropdown",
-                    options=[{"label": i, "value": i} for i in operation_options],
-                    value=operation_options[0],
+                    options=[
+                        {"label": i, "value": i} for i in OPERATION_OPTIONS.values()
+                    ],
+                    value=OPERATION_OPTIONS.values()[0],
                 ),
                 # Escolha da UF
                 dcc.Dropdown(
@@ -108,15 +111,10 @@ def update_main_plot(
         year_value (int): [Ano selecionado]
     """
 
-    # condições de filtro são o ano e o tipo de movimeentação
-    filters = (
-        (dataset["ANO"] == year_value)
-        & (dataset["MOVIMENTACAO"] == operation)
-        & (dataset["COD_NCM"] == product_value)
+    response: dict = data_processing.api_get_operation_statistics(
+        year_value, operation, product_value
     )
-    # agrupa por mês, e soma as colunas com as métricas de movimentação
-    df = dataset[filters].groupby(by="MES")[INDICATOR_OPTIONS].sum()
-    df.reset_index(level=0, inplace=True)  # remove MES como index
+    df = pd.DataFrame.from_dict(response)
 
     fig = df.plot(
         kind="bar",
@@ -162,26 +160,13 @@ def update_via_pie_plot(
     title = "Utilização percentual da via"
 
     # condições de filtro são o ano e o tipo de movimeentação
-    filters = (
-        (dataset["ANO"] == year_value)
-        & (dataset["MOVIMENTACAO"] == operation)
-        & (dataset["COD_NCM"] == product_value)
+    response: dict = data_processing.api_get_via_statistics_statistics(
+        year_value, operation, product_value
     )
-
-    filtered = dataset[filters]
-
-    # Calcula o uso percentual da via
-    count = pd.DataFrame(
-        {
-            "code": filtered["COD_VIA"].value_counts().index,
-            "count": filtered["COD_VIA"].value_counts().values,
-        }
-    )
-    total = count["count"].sum()
-    count["as_percentage"] = count["count"].apply(lambda x: round(x / total * 100))
+    df = pd.DataFrame.from_dict(response)
 
     # Personalizações do pie chart
     # https://plotly.com/python/pie-charts/
-    fig = px.pie(count, values="as_percentage", names="code", title=title)
+    fig = px.pie(df, values="as_percentage", names="code", title=title)
 
     return fig
