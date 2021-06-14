@@ -1,0 +1,1 @@
+web: gunicorn desafio_observatorio.app:server
