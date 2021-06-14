@@ -9,7 +9,7 @@ INDICATOR_OPTIONS = [
     "VL_FOB",
 ]
 
-OPERATION_OPTIONS = {"import": "importação", "export": "exportação"}
+OPERATION_OPTIONS = {"importação": "import", "exportação": "export"}
 
 VIA = {
     0: "VIA NAO DECLARADA",

@@ -14,7 +14,9 @@ from helpers import (
     OPERATION_OPTIONS,
 )
 
+years_options = data_processing.api_get_years_listing()
 
+operation_options = list(OPERATION_OPTIONS.keys())
 # também é usado como lista de opções para o dropdown
 product_options = data_processing.api_get_ncm_code_listing()
 # Preparando os dados da tabela
@@ -36,9 +38,9 @@ app.layout = html.Div(
                 dcc.Dropdown(
                     id="operation-options-dropdown",
                     options=[
-                        {"label": i, "value": i} for i in OPERATION_OPTIONS.values()
+                        {"label": i, "value": i} for i in operation_options
                     ],
-                    value=OPERATION_OPTIONS.values()[0],
+                    value=operation_options[0],
                 ),
                 # Escolha da UF
                 dcc.Dropdown(
@@ -55,10 +57,10 @@ app.layout = html.Div(
                 # Slider de seleção do ano
                 dcc.Slider(
                     id="year-slider-input",
-                    min=dataset["ANO"].min(),
-                    max=dataset["ANO"].max(),
-                    value=dataset["ANO"].max(),
-                    marks={str(year): str(year) for year in dataset["ANO"].unique()},
+                    min=min(years_options),
+                    max=max(years_options),
+                    value=max(years_options),
+                    marks={str(year): str(year) for year in years_options},
                     step=None,
                 ),
             ],
@@ -112,7 +114,7 @@ def update_main_plot(
     """
 
     response: dict = data_processing.api_get_operation_statistics(
-        year_value, operation, product_value
+        year_value, OPERATION_OPTIONS[operation], product_value
     )
     df = pd.DataFrame.from_dict(response)
 
@@ -161,7 +163,7 @@ def update_via_pie_plot(
 
     # condições de filtro são o ano e o tipo de movimeentação
     response: dict = data_processing.api_get_via_statistics_statistics(
-        year_value, operation, product_value
+        year_value, OPERATION_OPTIONS[operation], product_value
     )
     df = pd.DataFrame.from_dict(response)
 
