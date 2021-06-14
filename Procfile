@@ -1,1 +1,1 @@
-web: gunicorn desafio_observatorio.app:server
+web: gunicorn --pythonpath desafio_observatorio desafio_observatorio.app:server
