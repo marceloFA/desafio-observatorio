@@ -6,4 +6,5 @@ black          # formatador de código
 openpyxl       # leitura de arquivos .xlsx
 lxml           # usado pelo pandas para gerar dataframes a partir de html
 beautifulsoup4 # web scraping
+gunicorn       # para servir o app no Heroku
 
