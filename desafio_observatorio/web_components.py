@@ -116,7 +116,6 @@ def update_main_plot(
         year_value, OPERATION_OPTIONS[operation], product_value
     )
 
-    breakpoint()
     df = pd.DataFrame.from_dict(response)
 
     fig = df.plot(
