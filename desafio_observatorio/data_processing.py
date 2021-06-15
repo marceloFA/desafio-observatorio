@@ -4,7 +4,7 @@ import requests
 
 import pandas as pd
 
-from helpers import STATES, INDICATOR_OPTIONS, API_URL, OPERATION_OPTIONS
+from helpers import STATES, INDICATOR_OPTIONS, API_URL, OPERATION_OPTIONS_REVERSER
 
 
 def hit_api(endpoint: str) -> dict:
@@ -40,12 +40,10 @@ def api_get_state_contribution() -> dict:
 def api_get_operation_statistics(year: int, operation: str, cod_ncm: int) -> dict:
     """Obtém estatísticas sobre operações financeiras"""
 
-    operation_key = OPERATION_OPTIONS[operation]
-    return hit_api(f"operation_statistics/{year}/{operation_key}/{cod_ncm}")
+    return hit_api(f"operation_statistics/{year}/{operation}/{cod_ncm}")
 
 
 def api_get_via_statistics_statistics(year: int, operation: str, cod_ncm: int) -> dict:
     """Obtém dados sobre uso da via"""
 
-    operation_key = OPERATION_OPTIONS[operation]
-    return hit_api(f"via_statistics/{year}/{operation_key}/{cod_ncm}")
+    return hit_api(f"via_statistics/{year}/{operation}/{cod_ncm}")

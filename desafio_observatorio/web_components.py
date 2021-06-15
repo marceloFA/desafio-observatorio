@@ -15,7 +15,6 @@ from helpers import (
 )
 
 years_options = data_processing.api_get_years_listing()
-
 operation_options = list(OPERATION_OPTIONS.keys())
 # também é usado como lista de opções para o dropdown
 product_options = data_processing.api_get_ncm_code_listing()
@@ -116,6 +115,8 @@ def update_main_plot(
     response: dict = data_processing.api_get_operation_statistics(
         year_value, OPERATION_OPTIONS[operation], product_value
     )
+
+    breakpoint()
     df = pd.DataFrame.from_dict(response)
 
     fig = df.plot(

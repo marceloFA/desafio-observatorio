@@ -10,6 +10,7 @@ INDICATOR_OPTIONS = [
 ]
 
 OPERATION_OPTIONS = {"importação": "import", "exportação": "export"}
+OPERATION_OPTIONS_REVERSER = {"import": "importação", "export":"exportação"}
 
 VIA = {
     0: "VIA NAO DECLARADA",
