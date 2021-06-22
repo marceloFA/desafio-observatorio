@@ -5,6 +5,7 @@ import dash_html_components as html
 import dash_table
 import plotly.express as px
 import pandas as pd
+import base64
 
 import data_processing
 from helpers import (
@@ -28,8 +29,33 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Dados Comércio Exterior"
 pd.options.plotting.backend = "plotly"
 
+
+
 app.layout = html.Div(
     [
+        #título
+        html.H1(
+            children='Dashboard Comércio Exterior',
+            style={'textAlign': 'center','color':'rgb(23,61,116)'},
+        ),
+
+        html.Div([
+                html.Img(
+                    src=app.get_asset_url('logo.png'),
+                    #style={
+                      #  'height': '50%',
+                     #   'width': '50%'
+                    #}
+                    )
+        ], style={'textAlign': 'center'}),
+
+        #texto filtros
+        html.Div(
+            children='Filtros para a visualização',
+            style={'textAlign': 'center','font-weight': 'bold','font-size': '14px'},
+        ),        
+
+
         # filtros do gráfico principal
         html.Div(
             [
@@ -62,8 +88,9 @@ app.layout = html.Div(
                     marks={str(year): str(year) for year in years_options},
                     step=None,
                 ),
+                
             ],
-            style={"width": "49%"},
+            style={'width': '49%','margin':'auto'},
         ),
         # Visualização principal
         html.Div(
@@ -76,11 +103,30 @@ app.layout = html.Div(
             style={},
         ),
         # Tabela com a contribuição percentual dos estados
-        dash_table.DataTable(
-            id="percentual-contribution-table",
-            columns=[{"name": i, "id": i} for i in total_by_state.columns],
-            data=total_by_state.to_dict("records"),
-        ),
+        html.Div(
+            dash_table.DataTable(
+                id="percentual-contribution-table",
+                columns=[{"name": i, "id": i} for i in total_by_state.columns],
+                data=total_by_state.to_dict("records"),
+                #setando os valores das colunas     
+                style_cell_conditional=[
+                    {
+                        'if': {'column_id': c},
+                        'width': '8%'}
+                        for c in ['SG_UF','VL_KG_CONTRIB_%']
+                    
+                    ],
+                # visualização sem o grid
+                style_as_list_view=True,
+                #header preto
+                style_header={'backgroundColor': 'rgb(30, 30, 30)','color': 'white'},
+                fill_width=False,     
+                
+            ),
+            #estilos da div da tabela
+            style={'margin-left': '50px','margin-right':'50px'}
+        )
+
     ]
 )
 
