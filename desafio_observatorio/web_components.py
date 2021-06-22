@@ -5,7 +5,6 @@ import dash_html_components as html
 import dash_table
 import plotly.express as px
 import pandas as pd
-import base64
 
 import data_processing
 from helpers import (
