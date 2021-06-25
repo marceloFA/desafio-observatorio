@@ -14,6 +14,11 @@ from helpers import (
     OPERATION_OPTIONS,
 )
 
+# Set locale to format main plot values
+import locale
+locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+
+
 years_options = data_processing.api_get_years_listing()
 operation_options = list(OPERATION_OPTIONS.keys())
 # também é usado como lista de opções para o dropdown
@@ -115,6 +120,15 @@ def update_main_plot(
     response: dict = data_processing.api_get_operation_statistics(
         year_value, OPERATION_OPTIONS[operation], product_value
     )
+
+    i_opt = INDICATOR_OPTIONS  # data needed to be formated
+
+    # Format separators
+    for vl_key in i_opt:  # Iterate helpers.INDICATOR_OPTIONS list, getting indicator options keys
+        for key_name in response[vl_key].keys():  # Iterate API url, getting key names from indicator options
+            # Format separators using locale
+            # Use %d to don't show commas
+            response[vl_key][key_name] = locale.format_string("%d", int(response[vl_key][key_name]), grouping=True) 
 
     df = pd.DataFrame.from_dict(response)
 
