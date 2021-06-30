@@ -1,0 +1,27 @@
+name: Constrói a imagem do container na GCP
+
+on:
+  push:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+
+  build-container-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout no repositório
+      - uses: actions/checkout@v2
+
+      #- name: SU GCP Cloud Build
+      - name: Constrói a imagem do container
+        uses: StageUp/docker-cloud-build@1.0.3
+        with:
+          gcp-project-id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp-service-account-key: ${{ secrets.GCP_SA_KEY }}
+          gcp-cloud-storage-bucket: my-project-id_cloudbuild # Decidir se isso é necessário
+          gcp-gcr-region: us.gcr.io
+          image-name: my-image
+
