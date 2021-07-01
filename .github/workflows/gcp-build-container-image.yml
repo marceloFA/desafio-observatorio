@@ -17,7 +17,7 @@ jobs:
 
       #- name: SU GCP Cloud Build
       - name: Constrói a imagem do container
-        uses: StageUp/docker-cloud-build@1.0.3
+      - uses: StageUp/docker-cloud-build@1.0.3
         with:
           gcp-project-id: ${{ secrets.GCP_PROJECT_ID }}
           gcp-service-account-key: ${{ secrets.GCP_SA_KEY }}
