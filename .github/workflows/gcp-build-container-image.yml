@@ -21,7 +21,7 @@ jobs:
         with:
           gcp-project-id: ${{ secrets.GCP_PROJECT_ID }}
           gcp-service-account-key: ${{ secrets.GCP_SA_KEY }}
-          gcp-cloud-storage-bucket: my-project-id_cloudbuild # Decidir se isso é necessário
+          gcp-cloud-storage-bucket: ${{ secrets.GCP_PROJECT_ID }}_cloudbuild # Decidir se isso é necessário
           gcp-gcr-region: us.gcr.io
-          image-name: my-image
+          image-name: ${{ secrets.GCP_IMAGE_NAME }}
 
